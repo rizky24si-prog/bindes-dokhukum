@@ -5,7 +5,7 @@
 					<h3>DokdesKu</h3>
 				</li>
 				<li class="nav-item">
-					<a href="../../pages/dashboard/dashboard.html" class="nav-link">
+					<a href="{{ route('dashboard') }}" class="nav-link">
 						<span class="sidebar-icon">
 							<svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
 								xmlns="http://www.w3.org/2000/svg">
@@ -67,6 +67,17 @@
 						</ul>
 					</div>
 				</li>
+                <li class="nav-item">
+    <a href="{{ route('logout') }}" class="nav-link">
+        <span class="sidebar-icon">
+            <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
+            </svg>
+        </span>
+        <span class="sidebar-text">Logout</span>
+    </a>
+</li>
 			</ul>
 		</div>
 	</nav>

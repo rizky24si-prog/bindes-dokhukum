@@ -11,7 +11,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('dashboard', [DashboardController::class, 'index'])-> name('dashboard'); 
+Route::get('dashboard', [DashboardController::class, 'index'])-> name('dashboard');
 
 Route::resource('warga', WargaController::class);
 Route::resource('jenis-dokumen', JenisDokumenController::class);
@@ -22,7 +22,7 @@ Route::get('/login', [UserController::class, 'formlogin'])->name('login');
 Route::post('/login', [UserController::class, 'login'])->name('login.post');
 Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [UserController::class, 'register']);
-Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');

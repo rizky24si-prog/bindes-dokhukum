@@ -2,6 +2,7 @@
 
 @section('content')
 <!-- BEGIN: Content-->
+<div class="container mt-4">
 <div class="py-4">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
@@ -20,6 +21,8 @@
             <h1 class="h4">Dashboard Overview</h1>
             <p class="mb-0">Ringkasan statistik sistem.</p>
         </div>
+                    @include('layouts.admin.error')
+
     </div>
 </div>
 
@@ -48,10 +51,10 @@
                         </div>
                         <small class="text-gray-500">
                             {{ \Carbon\Carbon::now()->format('M Y') }}
-                        </small> 
+                        </small>
                         @if(isset($userGrowth))
-                        <div class="small d-flex mt-1">                               
-                            <div>Since last month 
+                        <div class="small d-flex mt-1">
+                            <div>Since last month
                                 @if($userGrowth >= 0)
                                     <svg class="icon icon-xs text-success" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
@@ -95,10 +98,10 @@
                         </div>
                         <small class="text-gray-500">
                             {{ \Carbon\Carbon::now()->format('M Y') }}
-                        </small> 
+                        </small>
                         @if(isset($wargaGrowth))
-                        <div class="small d-flex mt-1">                               
-                            <div>Since last month 
+                        <div class="small d-flex mt-1">
+                            <div>Since last month
                                 @if($wargaGrowth >= 0)
                                     <svg class="icon icon-xs text-success" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
@@ -142,10 +145,10 @@
                         </div>
                         <small class="text-gray-500">
                             {{ \Carbon\Carbon::now()->format('M Y') }}
-                        </small> 
+                        </small>
                         @if(isset($dokumenGrowth))
-                        <div class="small d-flex mt-1">                               
-                            <div>Since last month 
+                        <div class="small d-flex mt-1">
+                            <div>Since last month
                                 @if($dokumenGrowth >= 0)
                                     <svg class="icon icon-xs text-success" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
@@ -194,7 +197,6 @@
                                 <th class="border-0">Name</th>
                                 <th class="border-0">Email</th>
                                 <th class="border-0">Registered At</th>
-                                <th class="border-0">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -203,13 +205,7 @@
                                 <td class="border-0">{{ $user->name }}</td>
                                 <td class="border-0">{{ $user->email }}</td>
                                 <td class="border-0">{{ $user->created_at->format('d M Y') }}</td>
-                                <td class="border-0">
-                                    @if($user->email_verified_at)
-                                        <span class="badge bg-success">Verified</span>
-                                    @else
-                                        <span class="badge bg-warning">Pending</span>
-                                    @endif
-                                </td>
+
                             </tr>
                             @endforeach
                         </tbody>
@@ -235,6 +231,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endif
 <!-- END: Content-->

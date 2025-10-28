@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<!-- Primary Meta Tags -->
 
-	
+
 	<!-- Volt CSS -->
 	@include('layouts.admin.css')
 
