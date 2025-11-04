@@ -2,16 +2,16 @@
 
 @section('content')
 <main>
-    <section class="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center">
+    <section class="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center" style="background-image: url('{{ asset('assets-admin/img/bg-desa.png') }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
         <div class="container">
-            
+
             <div class="row justify-content-center form-bg-image" data-background-lg="{{ asset('assets-admin/img/illustrations/signin.svg') }}">
                 <div class="col-12 d-flex align-items-center justify-content-center">
-                    <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500">
+                    <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500" style="background-color: rgba(255, 255, 255, 0.95);">
                         <div class="text-center text-md-center mb-4 mt-md-0">
                             <h1 class="mb-0 h3">Create Account</h1>
                         </div>
-                        
+
                         @if(session('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 {{ session('success') }}
@@ -38,9 +38,9 @@
                                             <path d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"></path>
                                         </svg>
                                     </span>
-                                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
+                                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                                            placeholder="John Doe" id="name" value="{{ old('name') }}" autofocus required>
-                                </div>  
+                                </div>
                                 @error('name')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -55,9 +55,9 @@
                                             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                                         </svg>
                                     </span>
-                                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
+                                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                            placeholder="contoh@xyz.com" id="email" value="{{ old('email') }}" required>
-                                </div>  
+                                </div>
                                 @error('email')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -71,9 +71,9 @@
                                             <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
                                         </svg>
                                     </span>
-                                    <input type="password" name="password" placeholder="Password" 
+                                    <input type="password" name="password" placeholder="Password"
                                            class="form-control @error('password') is-invalid @enderror" id="password" required>
-                                </div>  
+                                </div>
                                 @error('password')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -87,20 +87,20 @@
                                             <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
                                         </svg>
                                     </span>
-                                    <input type="password" name="password_confirmation" placeholder="Confirm Password" 
+                                    <input type="password" name="password_confirmation" placeholder="Confirm Password"
                                            class="form-control" id="password_confirmation" required>
-                                </div>  
+                                </div>
                             </div>
 
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-gray-800">Buat Akun </button>
                             </div>
                         </form>
-                        
+
                         <div class="d-flex justify-content-center align-items-center mt-4">
                             <span class="fw-normal">
                                 Punya Akun?
-                                <a href="{{ route('login') }}" class="fw-bold">Login Disini
+                                <a href="{{ route('login') }}" class="fw-bold">Login Disini</a>
                             </span>
                         </div>
                     </div>

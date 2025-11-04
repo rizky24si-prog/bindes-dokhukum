@@ -33,7 +33,7 @@ class DashboardController extends Controller
         $userRegistrations = $this->getUserRegistrations();
         $recentUsers = User::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact(
+        return view('pages.admin.dashboard', compact(
             'totalUsers',
             'userGrowth',
             'totalWarga',

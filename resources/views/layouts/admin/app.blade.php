@@ -19,6 +19,9 @@
 
 	@yield('content')
 
+    @include('layouts.admin.whatsapp')
+
+
 	<!-- Volt JS -->
 	@include('layouts.admin.js')
 
