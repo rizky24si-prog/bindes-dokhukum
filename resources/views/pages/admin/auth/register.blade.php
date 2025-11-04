@@ -28,7 +28,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('register') }}" method="POST" class="mt-4">
+                        <form action="{{ route('register.store') }}" method="POST" class="mt-4">
                             @csrf
                             <div class="form-group mb-4">
                                 <label for="name">Nama Lengkap</label>
@@ -100,7 +100,7 @@
                         <div class="d-flex justify-content-center align-items-center mt-4">
                             <span class="fw-normal">
                                 Punya Akun?
-                                <a href="{{ route('login') }}" class="fw-bold">Login Disini</a>
+                                <a href="{{ route('login.index') }}" class="fw-bold">Login Disini</a>
                             </span>
                         </div>
                     </div>

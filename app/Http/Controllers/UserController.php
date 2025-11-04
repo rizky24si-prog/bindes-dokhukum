@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -97,67 +96,6 @@ class UserController extends Controller
             ->with('success', 'Data user berhasil dihapus!');
     }
 
-    public function showRegisterForm()
-    {
-        return view('pages.admin.auth.register');
-    }
 
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-
-        $validated['password'] = Hash::make($validated['password']);
-
-        $user = User::create($validated);
-
-        Auth::login($user);
-
-        return redirect()->route('dashboard')
-            ->with('success', 'Registrasi berhasil! Selamat datang ' . $user->name);
-    }
-
-
-    public function formlogin()
-    {
-        return view('pages.admin.auth.index');
-    }
-
-
-
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended('dashboard')
-                ->with('success', 'Login berhasil! Selamat datang ' . Auth::user()->name);
-        }
-
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
-    }
-
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('login')
-            ->with('success', 'Logout berhasil!');
-    }
 
 }
