@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+
+
 
 class RegisterController extends Controller
 {
@@ -39,7 +43,7 @@ class RegisterController extends Controller
 
         $user = User::create($validated);
 
-        Auth::login($user);
+        AuthController::login($user);
 
         return redirect()->route('dashboard')
             ->with('success', 'Registrasi berhasil! Selamat datang ' . $user->name);

@@ -2,7 +2,7 @@
 
 @section('content')
 <main>
-    <section class="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center" style="background-image: url('{{ asset('assets-admin/img/bg-desa.png') }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+    <section class="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center" style="background-image: url('{{ asset('assets-admin/img/bg-desa.jpeg') }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
         <div class="container">
 
             <div class="row justify-content-center form-bg-image" data-background-lg="{{ asset('assets-admin/img/illustrations/signin.svg') }}">
