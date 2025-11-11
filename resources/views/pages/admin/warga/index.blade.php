@@ -83,6 +83,7 @@
     @endforeach
 </tbody>
                         </table>
+                         @foreach($dataWarga as $data)
 <!-- Modal Detail Warga -->
 <div class="modal fade" id="detailWargaModal{{ $data->warga_id }}" tabindex="-1" aria-labelledby="detailWargaModalLabel{{ $data->warga_id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -159,6 +160,7 @@
                     <i class="fas fa-edit me-1"></i> Edit Data
                 </a>
             </div>
+            @endforeach
         </div>
     </div>
 </div>
