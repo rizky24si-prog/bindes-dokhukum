@@ -21,31 +21,32 @@
 
                 <!-- Fitur Utama -->
                 <li class="nav-item">
-                    <span class="nav-link d-flex justify-content-between align-items-center">
-                        <span>
-                            <span class="sidebar-icon">
-                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                </svg>
-                            </span>
-                            <span class="sidebar-text">Fitur Utama</span>
-                        </span>
-                    </span>
+    <span class="nav-link d-flex justify-content-between align-items-center">
+        <span>
+            <span class="sidebar-icon">
+                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                </svg>
+            </span>
+            <span class="sidebar-text">Fitur Utama</span>
+        </span>
+    </span>
                     <div class="multi-level" role="list">
                         <ul class="flex-column nav">
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <span class="sidebar-text">Modul A</span>
+                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('kategori.index') }}">
+                                    <span class="sidebar-text">Kategori Dokumen</span>
+                                </a>
+                            </li>
+                           <li class="nav-item">
+                                <a class="nav-link" href="{{ route('riwayat-perubahan.index') }}">
+                                    <span class="sidebar-text">Riwayat Perubahan</span>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <span class="sidebar-text">Modul B</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <span class="sidebar-text">Modul C</span>
+                                <a class="nav-link" href="{{ route('lampiran-dokumen.index') }}">
+                                    <span class="sidebar-text">Lampiran Dokumen</span>
                                 </a>
                             </li>
                         </ul>
@@ -82,6 +83,14 @@
                                     <span class="sidebar-text">User</span>
                                 </a>
                             </li>
+                           
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('dokumen.index') }}">
+                                    <span class="sidebar-text">Dokumen Hukum</span>
+                                </a>
+                            </li>
+                            
+                            
                         </ul>
                     </div>
                 </li>
