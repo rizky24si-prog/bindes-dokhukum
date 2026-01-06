@@ -6,38 +6,42 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
-        Schema::table('dokumen_hukum', function (Blueprint $table) {
-            $table->dropForeign('dokumen_hukum_media_id_foreign');
-        });
-        
-        Schema::dropIfExists('media');
-        
-        Schema::create('media', function (Blueprint $table) {
-            $table->id('media_id');
-            $table->string('ref_table', 100);
-            $table->unsignedBigInteger('ref_id');
-            $table->string('file_name');
-            $table->string('caption', 255)->nullable();
-            $table->string('mime_type', 100);
-            $table->integer('sort_order')->default(0);
-            $table->timestamps();
-            $table->softDeletes();
-            
-            $table->index(['ref_table', 'ref_id']);
-            $table->index('sort_order');
-            $table->index('mime_type');
-        });
-        
-        Schema::table('dokumen_hukum', function (Blueprint $table) {
-            $table->foreign('media_id')
-                  ->references('media_id')
-                  ->on('media')
-                  ->onDelete('set null')
-                  ->onUpdate('cascade');
-        });
+        // Cek apakah tabel sudah ada
+        if (!Schema::hasTable('media')) {
+            Schema::create('media', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama_file');
+                $table->string('path');
+                $table->string('tipe_file')->nullable();
+                $table->unsignedBigInteger('ukuran')->nullable();
+                $table->unsignedBigInteger('dokumen_id')->nullable();
+                $table->unsignedBigInteger('lampiran_id')->nullable();
+                $table->timestamps();
+                
+                // Hanya tambahkan foreign key jika bukan SQLite
+                if (config('database.default') !== 'sqlite') {
+                    $table->foreign('dokumen_id')->references('dokumen_id')->on('dokumen')->onDelete('cascade');
+                    $table->foreign('lampiran_id')->references('lampiran_id')->on('lampiran')->onDelete('cascade');
+                }
+            });
+        }
     }
 
-   
+    public function down()
+    {
+        // Untuk SQLite, drop tabel langsung
+        if (config('database.default') === 'sqlite') {
+            Schema::dropIfExists('media');
+        } else {
+            // Untuk MySQL/PostgreSQL, drop foreign key dulu
+            Schema::table('media', function (Blueprint $table) {
+                // Hapus foreign key constraints
+                $table->dropForeign(['dokumen_id']);
+                $table->dropForeign(['lampiran_id']);
+            });
+            Schema::dropIfExists('media');
+        }
+    }
 };
