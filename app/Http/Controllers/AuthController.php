@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator; // TAMBAHKAN INI
 
 class AuthController extends Controller
 {
@@ -28,6 +30,7 @@ class AuthController extends Controller
      */
     public function store(Request $request)
     {
+        // Gunakan $request->validate() yang lebih sederhana
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
@@ -43,9 +46,7 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
             
             // Log aktivitas login
-            activity()
-                ->causedBy(Auth::user())
-                ->log('User logged in');
+            Log::info('User logged in: ' . Auth::user()->email . ' - ' . Auth::user()->name);
 
             return redirect()->intended('dashboard')
                 ->with('success', 'Login berhasil! Selamat datang ' . Auth::user()->name);
@@ -63,9 +64,7 @@ class AuthController extends Controller
     {
         // Log aktivitas logout
         if (Auth::check()) {
-            activity()
-                ->causedBy(Auth::user())
-                ->log('User logged out');
+            Log::info('User logged out: ' . Auth::user()->email . ' - ' . Auth::user()->name);
         }
         
         // Clear semua session data
