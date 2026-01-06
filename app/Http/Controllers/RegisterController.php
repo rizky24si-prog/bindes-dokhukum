@@ -40,7 +40,6 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -53,9 +52,7 @@ class RegisterController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user', // Default role untuk user baru
-            'phone' => $request->phone,
-            'address' => $request->address,
+            'role' => 'admin', // Default role untuk user baru
             'is_active' => true,
         ]);
 
