@@ -53,7 +53,6 @@ class RegisterController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'admin', // Default role untuk user baru
-            'is_active' => true,
         ]);
 
         // Auto login setelah registrasi
