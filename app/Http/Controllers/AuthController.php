@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -15,15 +15,12 @@ class AuthController extends Controller
      */
     public function index()
     {
-         return view('pages.admin.auth.index');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        // Cek jika user sudah login, redirect ke dashboard
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        
+        return view('pages.admin.auth.index');
     }
 
     /**
@@ -38,6 +35,17 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            
+            // Set session last activity time
+            Session::put('last_activity', time());
+            
+            // Regenerate session ID untuk keamanan
+            $request->session()->regenerateToken();
+            
+            // Log aktivitas login
+            activity()
+                ->causedBy(Auth::user())
+                ->log('User logged in');
 
             return redirect()->intended('dashboard')
                 ->with('success', 'Login berhasil! Selamat datang ' . Auth::user()->name);
@@ -49,45 +57,34 @@ class AuthController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function logout(Request $request)
     {
-        //
-    }
-
-        public function logout(Request $request)
-    {
+        // Log aktivitas logout
+        if (Auth::check()) {
+            activity()
+                ->causedBy(Auth::user())
+                ->log('User logged out');
+        }
+        
+        // Clear semua session data
         Auth::logout();
-
+        Session::flush();
+        
+        // Invalidate session
         $request->session()->invalidate();
+        
+        // Regenerate CSRF token
         $request->session()->regenerateToken();
-
+        
+        // Clear cache headers
         return redirect()->route('login.index')
+            ->withHeaders([
+                'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => 'Sat, 01 Jan 2000 00:00:00 GMT',
+            ])
             ->with('success', 'Logout berhasil!');
     }
 }

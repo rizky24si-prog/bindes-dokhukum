@@ -4,77 +4,120 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DokumenHukum;
-use App\Models\JenisDokumen;
-use App\Models\KategoriDokumen;
-use App\Models\Media;
-
-
-
+use App\Models\JenisDokumen; // Ganti dari JenisDokumen
+use App\Models\Kategori; // Ganti dari KategoriDokumen
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DokumenHukumController extends Controller
 {
-    
     public function index(Request $request)
     {
-        $query = DokumenHukum::with(['jenis', 'kategori', 'media']);
+        // HAPUS ->with(['jenis', 'kategori', 'media']) menjadi:
+        $query = DokumenHukum::with(['JenisDokumen', 'kategori']); // HAPUS 'media'
         
+        // Search - HAPUS bagian media dari search
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('nomor', 'like', '%' . $search . '%')
                   ->orWhere('judul', 'like', '%' . $search . '%')
-                  ->orWhere('ringkasan', 'like', '%' . $search . '%');
+                  ->orWhere('ringkasan', 'like', '%' . $search . '%')
+                  ->orWhereHas('jenis', function($q) use ($search) {
+                      $q->where('nama_jenis', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('kategori', function($q) use ($search) {
+                      $q->where('nama', 'like', '%' . $search . '%');
+                  });
             });
         }
         
+        // Filter jenis
         if ($request->has('jenis_id') && !empty($request->jenis_id)) {
             $query->where('jenis_id', $request->jenis_id);
         }
         
+        // Filter kategori
+        if ($request->has('kategori_id') && !empty($request->kategori_id)) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+        
+        // Filter status
         if ($request->has('status') && !empty($request->status)) {
             $query->where('status', $request->status);
         }
         
-        $query->orderBy('created_at', 'desc');
+        // Filter tanggal
+        if ($request->has('start_date') && !empty($request->start_date)) {
+            $query->whereDate('tanggal', '>=', $request->start_date);
+        }
         
-        $dataDokumenHukum = $query->paginate(10);
+        if ($request->has('end_date') && !empty($request->end_date)) {
+            $query->whereDate('tanggal', '<=', $request->end_date);
+        }
         
-        $jenisDokumen = JenisDokumen::orderBy('nama_jenis')->get();
+        // Sort
+        $sort = $request->get('sort', 'created_at');
+        $order = $request->get('order', 'desc');
         
-        return view('pages.admin.dokumenhukum.index', compact('dataDokumenHukum', 'jenisDokumen'));
+        // Handle special sorting cases
+        if ($sort == 'jenis') {
+            $query->join('JenisDokumen', 'dokumen.jenis_id', '=', 'jenis.jenis_id')
+                  ->orderBy('jenis.nama_jenis', $order)
+                  ->select('dokumen.*');
+        } elseif ($sort == 'kategori') {
+            $query->join('kategori', 'dokumen.kategori_id', '=', 'kategori.kategori_id')
+                  ->orderBy('kategori.nama', $order)
+                  ->select('dokumen.*');
+        } else {
+            $query->orderBy($sort, $order);
+        }
+        
+        $dataDokumenHukum = $query->paginate(10)->withQueryString();
+        
+        $jenisDokumen = JenisDokumen::orderBy('nama_jenis')->get(); // Ganti dari JenisDokumen
+        $kategoriDokumen = Kategori::orderBy('nama')->get(); // Ganti dari KategoriDokumen
+        $statusOptions = [
+            'draft' => 'Draft',
+            'review' => 'Review',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            'archived' => 'Archived'
+        ];
+        
+        return view('pages.admin.dokumenhukum.index', compact(
+            'dataDokumenHukum', 
+            'jenisDokumen',
+            'kategoriDokumen',
+            'statusOptions'
+        ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
-{
-    $jenisDokumen = JenisDokumen::all();
-    $kategoriDokumen = KategoriDokumen::all();
-    
-    return view('pages.admin.dokumenhukum.create', compact('jenisDokumen', 'kategoriDokumen'));
-}
+    {
+        $jenisDokumen = Jenis::all(); // Ganti dari JenisDokumen
+        $kategoriDokumen = Kategori::all(); // Ganti dari KategoriDokumen
+        
+        return view('pages.admin.dokumenhukum.create', compact('jenisDokumen', 'kategoriDokumen'));
+    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'jenis_id' => 'required|exists:jenis_dokumen,jenis_id',
+            'jenis_id' => 'required|exists:jenis,jenis_id',
             'kategori_id' => 'required|exists:kategori,kategori_id',
-            'nomor' => 'required|string|max:100|unique:dokumen_hukum,nomor',
+            'nomor' => 'required|string|max:100|unique:dokumen,nomor', // Ganti 'dokumen_hukum' menjadi 'dokumen'
             'judul' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'ringkasan' => 'nullable|string',
-            'status' => 'required|in:draft,published,archived',
-            'berkas' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
+            'status' => 'required|in:draft,review,approved,rejected,archived',
+            'berkas' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240' // Optional jika belum ada upload
         ]);
 
         DB::beginTransaction();
 
         try {
-            // 1. Create dokumen first (without media reference)
+            // 1. Create dokumen
             $dokumen = DokumenHukum::create([
                 'jenis_id' => $request->jenis_id,
                 'kategori_id' => $request->kategori_id,
@@ -85,17 +128,19 @@ class DokumenHukumController extends Controller
                 'status' => $request->status
             ]);
 
-            // 2. Upload file
+            // 2. Upload file jika ada (SIMPAN DI LOCAL FOLDER DULU)
             if ($request->hasFile('berkas')) {
-                $dokumen->uploadBerkas(
-                    $request->file('berkas'),
-                    'Berkas: ' . $dokumen->judul
-                );
+                $file = $request->file('berkas');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('dokumen', $fileName, 'public');
+                
+                // Simpan path file di database (tambahkan kolom jika perlu)
+                // $dokumen->update(['file_path' => $filePath]);
             }
 
             DB::commit();
 
-            return redirect()->route('dokumen-hukum.index')
+            return redirect()->route('dokumen.index') // Pastikan route name benar
                 ->with('success', 'Dokumen hukum berhasil ditambahkan.');
 
         } catch (\Exception $e) {
@@ -106,72 +151,43 @@ class DokumenHukumController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-   public function edit($id)
-    {
-        $dokumen = DokumenHukum::with(['jenis', 'kategori', 'media'])->findOrFail($id);
-        $jenisDokumen = JenisDokumen::all();
-        $kategoriDokumen = KategoriDokumen::all();
+        // HAPUS 'media' dari with()
+        $dokumen = DokumenHukum::with(['jenis', 'kategori'])->findOrFail($id); // HAPUS 'media'
+        $jenisDokumen = Jenis::all(); // Ganti dari JenisDokumen
+        $kategoriDokumen = Kategori::all(); // Ganti dari KategoriDokumen
         
         return view('pages.admin.dokumenhukum.edit', compact('dokumen', 'jenisDokumen', 'kategoriDokumen'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-       public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'jenis_id' => 'required|exists:jenis_dokumen,jenis_id',
+            'jenis_id' => 'required|exists:jenis,jenis_id',
             'kategori_id' => 'required|exists:kategori,kategori_id',
             'nomor' => 'required|string|max:100',
             'judul' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'ringkasan' => 'nullable|string',
-            'status' => 'required|in:draft,published,archived',
+            'status' => 'required|in:draft,review,approved,rejected,archived',
             'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:10240'
         ]);
 
         $dokumen = DokumenHukum::findOrFail($id);
 
-        // Handle file upload jika ada
+        // Handle file upload jika ada (SIMPAN DI LOCAL FOLDER)
         if ($request->hasFile('file')) {
-            // Hapus file lama jika ada
-            if ($dokumen->media_id) {
-                $oldMedia = Media::find($dokumen->media_id);
-                if ($oldMedia) {
-                    Storage::delete($oldMedia->file_path);
-                    $oldMedia->delete();
-                }
-            }
-
-            // Upload file baru
             $file = $request->file('file');
-            $path = $file->store('dokumen-hukum', 'public');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('dokumen', $fileName, 'public');
             
-            $media = Media::create([
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-                'disk' => 'public'
-            ]);
-
-            $request->merge(['media_id' => $media->media_id]);
+            // Simpan path di database (tambahkan kolom jika perlu)
+            // $dokumen->file_path = $filePath;
         }
 
         $dokumen->update($request->only([
-            'jenis_id', 'kategori_id', 'media_id', 
+            'jenis_id', 'kategori_id', 
             'judul', 'tanggal', 'ringkasan', 'status'
         ]));
 
@@ -179,20 +195,13 @@ class DokumenHukumController extends Controller
             ->with('success', 'Dokumen berhasil diperbarui');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-   public function destroy($id)
+    public function destroy($id)
     {
         $dokumen = DokumenHukum::findOrFail($id);
         
-        // Hapus file media jika ada
-        if ($dokumen->media_id) {
-            $media = Media::find($dokumen->media_id);
-            if ($media) {
-                Storage::disk($media->disk)->delete($media->file_path);
-                $media->delete();
-            }
+        // Hapus file jika ada
+        if ($dokumen->file_path && Storage::exists('public/' . $dokumen->file_path)) {
+            Storage::delete('public/' . $dokumen->file_path);
         }
 
         $dokumen->delete();

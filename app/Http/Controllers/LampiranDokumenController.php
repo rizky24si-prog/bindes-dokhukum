@@ -15,23 +15,65 @@ class LampiranDokumenController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $query = LampiranDokumen::with(['dokumen', 'media'])
-            ->latestFirst();
-        
-        // Filter berdasarkan dokumen jika ada parameter
-        if ($request->has('dokumen_id') && $request->dokumen_id) {
-            $query->where('dokumen_id', $request->dokumen_id);
-            $dokumen = DokumenHukum::find($request->dokumen_id);
-        } else {
-            $dokumen = null;
-        }
-        
-        $dataLampiran = $query->paginate(10);
-        $allDokumen = DokumenHukum::orderBy('judul')->get();
-        
-        return view('pages.admin.lampirandokumen.index', compact('dataLampiran', 'allDokumen', 'dokumen'));
+{
+    $query = LampiranDokumen::with(['dokumen', 'media']);
+    
+    // Search
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('keterangan', 'like', '%' . $search . '%')
+              ->orWhere('nama_file', 'like', '%' . $search . '%')
+              ->orWhereHas('dokumen', function($q) use ($search) {
+                  $q->where('judul', 'like', '%' . $search . '%')
+                    ->orWhere('nomor', 'like', '%' . $search . '%');
+              });
+        });
     }
+    
+    // Filter berdasarkan dokumen
+    if ($request->has('dokumen_id') && $request->dokumen_id) {
+        $query->where('dokumen_id', $request->dokumen_id);
+        $dokumen = DokumenHukum::find($request->dokumen_id);
+    } else {
+        $dokumen = null;
+    }
+    
+    // Filter tipe file
+    if ($request->has('tipe_file') && $request->tipe_file) {
+        $query->where('tipe_file', 'like', '%' . $request->tipe_file . '%');
+    }
+    
+    // Filter tanggal
+    if ($request->has('start_date') && $request->start_date) {
+        $query->whereDate('created_at', '>=', $request->start_date);
+    }
+    
+    if ($request->has('end_date') && $request->end_date) {
+        $query->whereDate('created_at', '<=', $request->end_date);
+    }
+    
+    // Sort
+    $sort = $request->get('sort', 'created_at');
+    $order = $request->get('order', 'desc');
+    $query->orderBy($sort, $order);
+    
+    $dataLampiran = $query->paginate(10)->withQueryString();
+    $allDokumen = DokumenHukum::orderBy('judul')->get();
+    
+    // Get tipe file untuk filter
+    $tipeFileList = LampiranDokumen::select('tipe_file')
+        ->whereNotNull('tipe_file')
+        ->distinct()
+        ->pluck('tipe_file');
+    
+    return view('pages.admin.lampirandokumen.index', compact(
+        'dataLampiran', 
+        'allDokumen', 
+        'dokumen',
+        'tipeFileList'
+    ));
+}
 
     /**
      * Show the form for creating a new resource.

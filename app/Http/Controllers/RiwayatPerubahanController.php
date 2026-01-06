@@ -13,35 +13,64 @@ class RiwayatPerubahanController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $query = RiwayatPerubahan::with('dokumen')
-            ->latestFirst();
-        
-        // Filter berdasarkan dokumen jika ada parameter
-        if ($request->has('dokumen_id') && $request->dokumen_id) {
-            $query->where('dokumen_id', $request->dokumen_id);
-            $dokumen = DokumenHukum::find($request->dokumen_id);
-        } else {
-            $dokumen = null;
-        }
-        
-        // Filter berdasarkan tipe perubahan
-        if ($request->has('tipe_perubahan') && $request->tipe_perubahan) {
-            $query->where('tipe_perubahan', $request->tipe_perubahan);
-        }
-        
-        $dataRiwayat = $query->paginate(10);
-        $allDokumen = DokumenHukum::orderBy('judul')->get();
-        $tipePerubahanOptions = [
-            'revisi' => 'Revisi',
-            'penambahan' => 'Penambahan',
-            'pengurangan' => 'Pengurangan',
-            'koreksi' => 'Koreksi',
-            'pembaruan' => 'Pembaruan'
-        ];
-        
-        return view('pages.admin.riwayatperubahan.index', compact('dataRiwayat', 'allDokumen', 'dokumen', 'tipePerubahanOptions'));
+{
+    $query = RiwayatPerubahan::with('dokumen');
+    
+    // Search
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('uraian_perubahan', 'like', '%' . $search . '%')
+              ->orWhere('versi', 'like', '%' . $search . '%')
+              ->orWhere('pembuat', 'like', '%' . $search . '%');
+        });
     }
+    
+    // Filter berdasarkan dokumen
+    if ($request->has('dokumen_id') && $request->dokumen_id) {
+        $query->where('dokumen_id', $request->dokumen_id);
+        $dokumen = DokumenHukum::find($request->dokumen_id);
+    } else {
+        $dokumen = null;
+    }
+    
+    // Filter berdasarkan tipe perubahan
+    if ($request->has('tipe_perubahan') && $request->tipe_perubahan) {
+        $query->where('tipe_perubahan', $request->tipe_perubahan);
+    }
+    
+    // Filter tanggal
+    if ($request->has('start_date') && $request->start_date) {
+        $query->whereDate('tanggal', '>=', $request->start_date);
+    }
+    
+    if ($request->has('end_date') && $request->end_date) {
+        $query->whereDate('tanggal', '<=', $request->end_date);
+    }
+    
+    // Sort
+    $sort = $request->get('sort', 'tanggal');
+    $order = $request->get('order', 'desc');
+    $query->orderBy($sort, $order);
+    
+    $dataRiwayat = $query->paginate(10)->withQueryString();
+    $allDokumen = DokumenHukum::orderBy('judul')->get();
+    
+    $tipePerubahanOptions = [
+        'revisi' => 'Revisi',
+        'penambahan' => 'Penambahan',
+        'pengurangan' => 'Pengurangan',
+        'koreksi' => 'Koreksi',
+        'pembaruan' => 'Pembaruan'
+    ];
+    
+    return view('pages.admin.riwayatperubahan.index', compact(
+        'dataRiwayat', 
+        'allDokumen', 
+        'dokumen', 
+        'tipePerubahanOptions'
+    ));
+}
 
     /**
      * Show the form for creating a new resource.

@@ -10,11 +10,28 @@ class JenisDokumenController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $data['dataJenisDokumen'] = JenisDokumen::all();
-		return view('pages.admin.jenisdokumen.index',$data);
+    public function index(Request $request)
+{
+    $query = JenisDokumen::query();
+    
+    // Search
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('nama_jenis', 'like', '%' . $search . '%')
+              ->orWhere('deskripsi', 'like', '%' . $search . '%');
+        });
     }
+    
+    // Sort
+    $sort = $request->get('sort', 'nama_jenis');
+    $order = $request->get('order', 'asc');
+    $query->orderBy($sort, $order);
+    
+    $dataJenisDokumen = $query->paginate(10)->withQueryString();
+    
+    return view('pages.admin.jenisdokumen.index', compact('dataJenisDokumen'));
+}
 
     /**
      * Show the form for creating a new resource.

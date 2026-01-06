@@ -10,11 +10,49 @@ class WargaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $data['dataWarga'] = Warga::all();
-		return view('pages.admin.warga.index',$data);
+    public function index(Request $request)
+{
+    $query = Warga::query();
+    
+    // Search
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('nama', 'like', '%' . $search . '%')
+              ->orWhere('no_ktp', 'like', '%' . $search . '%')
+              ->orWhere('email', 'like', '%' . $search . '%')
+              ->orWhere('telp', 'like', '%' . $search . '%');
+        });
     }
+    
+    // Filter jenis kelamin
+    if ($request->has('jenis_kelamin') && $request->jenis_kelamin) {
+        $query->where('jenis_kelamin', $request->jenis_kelamin);
+    }
+    
+    // Filter agama
+    if ($request->has('agama') && $request->agama) {
+        $query->where('agama', $request->agama);
+    }
+    
+    // Filter pekerjaan
+    if ($request->has('pekerjaan') && $request->pekerjaan) {
+        $query->where('pekerjaan', 'like', '%' . $request->pekerjaan . '%');
+    }
+    
+    // Sort
+    $sort = $request->get('sort', 'nama');
+    $order = $request->get('order', 'asc');
+    $query->orderBy($sort, $order);
+    
+    $dataWarga = $query->paginate(10)->withQueryString();
+    
+    // Get unique values for filters
+    $agamaList = Warga::select('agama')->whereNotNull('agama')->distinct()->pluck('agama');
+    $pekerjaanList = Warga::select('pekerjaan')->whereNotNull('pekerjaan')->distinct()->pluck('pekerjaan');
+    
+    return view('pages.admin.warga.index', compact('dataWarga', 'agamaList', 'pekerjaanList'));
+}
 
     /**
      * Show the form for creating a new resource.

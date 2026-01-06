@@ -11,11 +11,36 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $data['dataUser'] = User::all();
-        return view('pages.admin.user.index', $data);
+    public function index(Request $request)
+{
+    $query = User::query();
+    
+    // Search
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', '%' . $search . '%')
+              ->orWhere('email', 'like', '%' . $search . '%');
+        });
     }
+    
+    // Filter role
+    if ($request->has('role') && $request->role) {
+        $query->where('role', $request->role);
+    }
+    
+    // Sort
+    $sort = $request->get('sort', 'name');
+    $order = $request->get('order', 'asc');
+    $query->orderBy($sort, $order);
+    
+    $dataUser = $query->paginate(10)->withQueryString();
+    
+    // Get roles for filter
+    $roles = User::select('role')->distinct()->pluck('role');
+    
+    return view('pages.admin.user.index', compact('dataUser', 'roles'));
+}
 
     /**
      * Show the form for creating a new resource.

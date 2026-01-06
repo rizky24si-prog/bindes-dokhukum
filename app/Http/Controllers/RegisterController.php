@@ -33,21 +33,36 @@ class RegisterController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|max:255',
-        'email' => 'required|email|unique:users',
-        'password' => 'required|min:8|confirmed',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+        ]);
 
-    $validated['password'] = Hash::make($validated['password']);
-    $user = User::create($validated);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-    Auth::login($user);
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'user', // Default role untuk user baru
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'is_active' => true,
+        ]);
 
-    return redirect()->route('dashboard')
-        ->with('success', 'Registrasi berhasil! Selamat datang ' . $user->name);
-}
+        // Auto login setelah registrasi
+        auth()->login($user);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Registrasi berhasil! Selamat datang ' . $user->name);
+    }
 
     /**
      * Display the specified resource.

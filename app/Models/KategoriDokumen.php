@@ -2,33 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class KategoriDokumen extends Model
 {
-    use HasFactory;
-
-    protected $table = 'kategori';
+    protected $table = 'kategori'; // Nama tabel: kategori
     protected $primaryKey = 'kategori_id';
+    public $timestamps = false;
     
-    protected $fillable = [
-        'nama',
-        'deskripsi'
-    ];
-
+    protected $fillable = ['nama', 'deskripsi'];
+    
+    // Relasi ke DokumenHukum
     public function dokumenHukum()
     {
         return $this->hasMany(DokumenHukum::class, 'kategori_id', 'kategori_id');
     }
-
-    public function scopeAktif($query)
+    
+    // Alias untuk kompatibilitas
+    public function dokumen()
     {
-        return $query->where('status', 'aktif');
-    }
-
-    public function getJumlahDokumenAttribute()
-    {
-        return $this->dokumenHukum()->count();
+        return $this->hasMany(DokumenHukum::class, 'kategori_id', 'kategori_id');
     }
 }

@@ -48,8 +48,8 @@
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
                             <div>
-                                <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-filter me-1"></i> Filter
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i> Cari
                                 </button>
                                 <a href="{{ route('lampiran-dokumen.index') }}" class="btn btn-secondary">
                                     <i class="fas fa-redo me-1"></i> Reset

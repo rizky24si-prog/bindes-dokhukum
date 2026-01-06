@@ -11,12 +11,34 @@ class KategoriController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $dataKategori = KategoriDokumen::withCount('dokumenHukum')->get();
-        
-        return view('pages.admin.kategori.index', compact('dataKategori'));
+    public function index(Request $request)
+{
+    $query = KategoriDokumen::withCount('dokumenHukum');
+    
+    // Search
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('nama', 'like', '%' . $search . '%')
+              ->orWhere('deskripsi', 'like', '%' . $search . '%');
+        });
     }
+    
+    // Sort
+    $sort = $request->get('sort', 'nama');
+    $order = $request->get('order', 'asc');
+    
+    // Handle sorting by dokumen count
+    if ($sort == 'dokumen_count') {
+        $query->orderBy('dokumen_hukum_count', $order);
+    } else {
+        $query->orderBy($sort, $order);
+    }
+    
+    $dataKategori = $query->paginate(10)->withQueryString();
+    
+    return view('pages.admin.kategori.index', compact('dataKategori'));
+}
 
     /**
      * Show the form for creating a new resource.
